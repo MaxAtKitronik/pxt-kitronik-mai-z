@@ -1,5 +1,5 @@
 {
-    "name": "Mai-Z",
+    "name": "pxt-kitronik-mai-z",
     "description": "",
     "dependencies": {
         "core": "*",
