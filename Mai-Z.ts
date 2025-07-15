@@ -351,7 +351,10 @@ namespace kitronikMaiZ {
 				// Send Move Command And Parameters
 				commsRetries(CommandID.MOVE, [(movedirection as number), speed, distanceValue], CommandType.TxCommand);
 				// Set Forwards Continuous Flag
-				forwardContFlag = true; // Reset On Stop Commands / New Movement Commands Auto Cliff Detection Handled Separately (If Statement Below)
+				forwardContFlag = true; // Reset On Stop Commands / New Movement Commands / Auto Cliff Detection
+				// Reset Spin Continuous Flags
+				rightContFlag = false;
+				leftContFlag = false;
 			}
 		}
 		// If Distance Entered
@@ -404,6 +407,8 @@ namespace kitronikMaiZ {
 	//% speed.min=1 speed.max=100 speed.defl=50
 	//% speed.fieldOptions.precision=1
 	export function maizRotateContinuous(rotatedirection: RotateDirection, speed: number): void {
+		// Reset Forward Continuous Flag
+		forwardContFlag = false;
 		// Check Requested Direction
 		const clockwiseFlag = (rotatedirection === RotateDirection.Clockwise);
 		// Check If Requested Direction Is Already Active
