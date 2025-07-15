@@ -353,20 +353,6 @@ namespace kitronikMaiZ {
 				// Set Forwards Continuous Flag
 				forwardContFlag = true; // Reset On Stop Commands / New Movement Commands Auto Cliff Detection Handled Separately (If Statement Below)
 			}
-			else if (autoCliffEnabled)
-			{
-				// Send Error Read To Check For Cliff Status
-				rxMessage(CommandID.ERROR_READ)
-				// If No Error
-				if (errorStatus === ErrorCode.NO_ERROR) {
-					return;  // Continuous Movement Still Okay, Do Not Send Duplicate Command 
-				}
-				// If A Cliff Detected
-				if (errorStatus === ErrorCode.CLIFF_DETECTED) {
-					// Re Send Move Continuous Command As Auto Cliff Stopped Movement, Flag Can Stay Set As Movement Being Re Called
-					commsRetries(CommandID.MOVE, [(movedirection as number), speed, distanceValue], CommandType.TxCommand); 
-				}
-			}
 		}
 		// If Distance Entered
 		else{
@@ -440,20 +426,6 @@ namespace kitronikMaiZ {
 				leftContFlag = true; // Reset On Stop Commands / New Direction
 			}
 		}
-		else if (autoCliffEnabled)
-			{
-				// Send Error Read To Check For Cliff Status
-				rxMessage(CommandID.ERROR_READ)
-				// If No Error
-				if (errorStatus === ErrorCode.NO_ERROR) {
-					return;  // Continuous Movement Still Okay, Do Not Send Duplicate Command 
-				}
-				// If A Cliff Detected
-				if (errorStatus === ErrorCode.CLIFF_DETECTED) {
-					// Re Send Move Continuous Command As Auto Cliff Stopped Movement, Flag Can Stay Set As Movement Being Re Called
-					commsRetries(CommandID.SPIN, [(rotatedirection as number), speed, MoveDistance.Continuous], CommandType.TxCommand);
-				}
-			}
 		// Short Pause
 		basic.pause(100); // Allows For Movements / Motors To Be Completely Stopped Before Any Subsequent Commands Are Called
 	}
@@ -1143,6 +1115,13 @@ namespace kitronikMaiZ {
 			case CommandID.ERROR_READ:{
 				// Extract Command Completed Status
 				errorStatus = rxDataBuffer[2]; // 3rd Byte Is Where Relevant Data Is Stored
+				// Check For Cliff Error
+                if (errorStatus == ErrorCode.CLIFF_DETECTED){
+                    // Reset Continuous Movement Flags (Cliff Error Stops Movement On Back End)
+                    rightContFlag = false;
+                    leftContFlag = false;
+                    forwardContFlag = false;
+                }
 				return;
 			}
 			// Command Completed Status
@@ -1217,6 +1196,10 @@ namespace kitronikMaiZ {
 				basic.pause(500); // 500 mS
 				// Reset Retries Counter To Give Full Amount Of Retries
 				retriesCounter = 0;
+				// Reset Continuous Movement Flags (Cliff Error Stops Movement On Back End)
+				rightContFlag = false;
+				leftContFlag = false;
+				forwardContFlag = false;
 				// Retry Original Command
 				continue;
 			}
