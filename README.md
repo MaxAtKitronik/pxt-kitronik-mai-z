@@ -8,7 +8,7 @@ The Sensors blocks include all functionalities for the front distance sensor and
 The Buzzer blocks allow for specific buzzer function such as beeping the horn.
 The units blocks allow for the user to choose between cm or inches, this relates to specific movement distances and the front distance sensor.
 
-For more information and educational resources, please visit the [product page here].
+For more information and educational resources, please visit the [product page here] (kitronik.co.uk/56130).
 
 ## Use as Extension
 
