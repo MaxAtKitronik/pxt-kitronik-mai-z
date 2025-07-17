@@ -11,9 +11,6 @@ namespace kitronikMaiZ {
 	let distanceValue: number = 0; // Variable To Store Distance Value
 	const INCHES_CONSTANT: number = 2.54; // Inches To Centimeters Conversion Constant
 	const DISTANCE_CONSTANT: number = 100; // This Is To Avoid Decimals Not Being Sent As Parameters Are Sent At A Byte Level
-	let forwardContFlag: boolean = false; // Flag To Track Whether Forward Continuous Has Already Been Sent To Avoid Duplicate Messages Being Sent Over The I2C Comms
-	let leftContFlag: boolean = false; // Flag To Track Whether Left / Anti Clockwise Continuous Has Already Been Sent To Avoid Duplicate Messages Being Sent Over The I2C Comms
-	let rightContFlag: boolean = false; // Flag To Track Whether Right / Clockwise Continuous Has Already Been Sent To Avoid Duplicate Messages Being Sent Over The I2C Comms
 	// Sensors
 	let lineFollowValue: number = 0x00; // Line Following
 	let frontDistanceValue: number = 0x00; // Front Distance
@@ -346,16 +343,8 @@ namespace kitronikMaiZ {
 		distanceValue = ((distance as number) * DISTANCE_CONSTANT);
 		// Check If Continuous Is Entered
 		if (distanceValue == MoveDistance.Continuous){
-			// Check If Command Has Already Been Set
-			if (!forwardContFlag){
-				// Send Move Command And Parameters
-				commsRetries(CommandID.MOVE, [(movedirection as number), speed, distanceValue], CommandType.TxCommand);
-				// Set Forwards Continuous Flag
-				forwardContFlag = true; // Reset On Stop Commands / New Movement Commands / Auto Cliff Detection
-				// Reset Spin Continuous Flags
-				rightContFlag = false;
-				leftContFlag = false;
-			}
+			// Send Move Command And Parameters
+			commsRetries(CommandID.MOVE, [(movedirection as number), speed, distanceValue], CommandType.TxCommand);
 		}
 		// If Distance Entered
 		else{
@@ -367,10 +356,6 @@ namespace kitronikMaiZ {
 			const distanceArray = intToByte(distanceValue);
 			// Send MoveCommand And Parameters
 			commsRetries(CommandID.MOVE, [(movedirection as number), speed].concat(distanceArray), CommandType.TxCommand);
-			// Reset Continuous Flags
-			forwardContFlag = false;
-			rightContFlag = false;
-			leftContFlag = false;
 			// Send Manoeuvre Complete Read Command 
 			commsRetries(CommandID.COMMAND_FINISHED_READ, [], CommandType.RxCommand);
 			// 10ms Delay - Prevent Overload
@@ -407,30 +392,8 @@ namespace kitronikMaiZ {
 	//% speed.min=1 speed.max=100 speed.defl=50
 	//% speed.fieldOptions.precision=1
 	export function maizRotateContinuous(rotatedirection: RotateDirection, speed: number): void {
-		// Reset Forward Continuous Flag
-		forwardContFlag = false;
-		// Check Requested Direction
-		const clockwiseFlag = (rotatedirection === RotateDirection.Clockwise);
-		// Check If Requested Direction Is Already Active
-		const activeFlag = clockwiseFlag ? rightContFlag : leftContFlag;
-		// If Requested Direction Not Active Call Movement As Normal
-		if (!activeFlag){
-			// Check If The Requested Command Has Already Been Sent, If So Return To Avoid Duplicate Commands Being Sent Over The I2C Line
-			if (rotatedirection === RotateDirection.Clockwise && rightContFlag) return;
-			if (rotatedirection === RotateDirection.Anticlockwise && leftContFlag) return;
-			// Reset Flags For The New Command Call
-			rightContFlag = false;
-			leftContFlag = false;
-			// Send Rotate (Spin) Command And Parameters
-			commsRetries(CommandID.SPIN, [(rotatedirection as number), speed, MoveDistance.Continuous], CommandType.TxCommand);
-			// Set Flag Based On New Command Sent
-			if (rotatedirection === RotateDirection.Clockwise){
-				rightContFlag = true; // Reset On Stop Commands / New Direction
-			}
-			else{
-				leftContFlag = true; // Reset On Stop Commands / New Direction
-			}
-		}
+		// Send Rotate (Spin) Command And Parameters
+		commsRetries(CommandID.SPIN, [(rotatedirection as number), speed, MoveDistance.Continuous], CommandType.TxCommand);
 		// Short Pause
 		basic.pause(100); // Allows For Movements / Motors To Be Completely Stopped Before Any Subsequent Commands Are Called
 	}
@@ -470,10 +433,6 @@ namespace kitronikMaiZ {
 		const distanceArray = intToByte(distanceValue);
 		// Send Rotate (Spin) Command And Parameters
 		commsRetries(CommandID.SPIN, [(rotateDirection as number), speed].concat(distanceArray), CommandType.TxCommand); // Pass The Angle As A Positive Number/Unsigned Integer
-		// Reset Continuous Flags
-		forwardContFlag = false;
-		rightContFlag = false;
-		leftContFlag = false;
 		// Send Manoeuvre Complete Read Command 
 		commsRetries(CommandID.COMMAND_FINISHED_READ, [], CommandType.RxCommand);
 		// 10ms Delay - Prevent Overload
@@ -507,10 +466,6 @@ namespace kitronikMaiZ {
 	export function maiz360Rotation(rotatedirection: RotateDirection, speed: number): void {
 		// Send Turn Command And Parameters
 		commsRetries(CommandID.SPIN, [(rotatedirection as number), speed, 0xA0, 0x8c], CommandType.TxCommand); // Pass The Chosen Direction With A Angle Of 360 (0xA0, 0x8C = 18000 In Hex) And A Speed Of 1%
-		// Reset Continuous Flags
-		forwardContFlag = false;
-		rightContFlag = false;
-		leftContFlag = false;
 		// Send Manoeuvre Complete Read Command 
 		commsRetries(CommandID.COMMAND_FINISHED_READ, [], CommandType.RxCommand);
 		// 10ms Delay - Prevent Overload
@@ -543,10 +498,6 @@ namespace kitronikMaiZ {
 	export function maizStop(): void {
 		// Send Stop Command
 		commsRetries(CommandID.STOP, [], CommandType.TxCommand);
-		// Reset Continuous Flags
-		rightContFlag = false;
-		leftContFlag = false;
-		forwardContFlag = false;
 		// Short Pause
 		basic.pause(100); // Allows For Movements / Motors To Be Completely Stopped Before Any Subsequent Commands Are Called
 	}
@@ -568,10 +519,6 @@ namespace kitronikMaiZ {
 	export function maizGradualStop(): void {
 		// Send Gradual Stop Command
 		commsRetries(CommandID.GRADUAL_STOP, [], CommandType.TxCommand);
-		// Reset Continuous Flags
-		rightContFlag = false;
-		leftContFlag = false;
-		forwardContFlag = false;
 		// Send Manoeuvre Complete Read Command 
 		commsRetries(CommandID.COMMAND_FINISHED_READ, [], CommandType.RxCommand);
 		// 10ms Delay - Prevent Overload
@@ -613,10 +560,6 @@ namespace kitronikMaiZ {
 		const distanceArray = intToByte(distanceValue);
 		// Send MoveCommand And Parameters
 		commsRetries(CommandID.MOVE, [(MoveDirection.Forwards), speed].concat(distanceArray), CommandType.TxCommand);
-		// Reset Continuous Flags
-		forwardContFlag = false;
-		rightContFlag = false;
-		leftContFlag = false;
 		// Send Manoeuvre Complete Read Command 
 		commsRetries(CommandID.COMMAND_FINISHED_READ, [], CommandType.RxCommand);
 		// 10ms Delay - Prevent Overload
@@ -650,10 +593,6 @@ namespace kitronikMaiZ {
 	export function maizTurnTiles(tileturndirection: TurnTiles): void {
 		// Send Turn Command And Parameters
 		commsRetries(CommandID.SPIN, [(tileturndirection as number), 1, 0x28, 0x23], CommandType.TxCommand); // Pass The Chosen Direction With A Angle Of 90 (0x28, 0x23 = 900 In Hex) And A Speed Of 1%
-		// Reset Continuous Flags
-		forwardContFlag = false;
-		rightContFlag = false;
-		leftContFlag = false;
 		// Send Manoeuvre Complete Read Command 
 		commsRetries(CommandID.COMMAND_FINISHED_READ, [], CommandType.RxCommand);
 		// 10ms Delay - Prevent Overload
@@ -687,10 +626,6 @@ namespace kitronikMaiZ {
 	export function maizUTurn(): void {
 		// Send Turn Command And Parameters
 		commsRetries(CommandID.SPIN, [(RotateDirection.Clockwise), 1, 0x50, 0x46], CommandType.TxCommand); // Pass The Chosen Direction With A Angle Of 180 (0x50, 0x46 = 1800 In Hex) And A Speed Of 1%
-		// Reset Continuous Flags
-		forwardContFlag = false;
-		rightContFlag = false;
-		leftContFlag = false;
 		// Send Manoeuvre Complete Read Command 
 		commsRetries(CommandID.COMMAND_FINISHED_READ, [], CommandType.RxCommand);
 		// 10ms Delay - Prevent Overload
@@ -1120,13 +1055,6 @@ namespace kitronikMaiZ {
 			case CommandID.ERROR_READ:{
 				// Extract Command Completed Status
 				errorStatus = rxDataBuffer[2]; // 3rd Byte Is Where Relevant Data Is Stored
-				// Check For Cliff Error
-                if (errorStatus == ErrorCode.CLIFF_DETECTED){
-                    // Reset Continuous Movement Flags (Cliff Error Stops Movement On Back End)
-                    rightContFlag = false;
-                    leftContFlag = false;
-                    forwardContFlag = false;
-                }
 				return;
 			}
 			// Command Completed Status
@@ -1201,10 +1129,6 @@ namespace kitronikMaiZ {
 				basic.pause(500); // 500 mS
 				// Reset Retries Counter To Give Full Amount Of Retries
 				retriesCounter = 0;
-				// Reset Continuous Movement Flags (Cliff Error Stops Movement On Back End)
-				rightContFlag = false;
-				leftContFlag = false;
-				forwardContFlag = false;
 				// Retry Original Command
 				continue;
 			}
@@ -1215,6 +1139,5 @@ namespace kitronikMaiZ {
 				basic.pause(5); // Was 200 mS
 			}
 		}
-		// What To Do If Comms Are Unsuccessful Still ?
 	}
 }
