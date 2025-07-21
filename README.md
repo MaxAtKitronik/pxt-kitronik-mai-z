@@ -8,7 +8,7 @@ The Sensors blocks include all functionalities for the front distance sensor and
 The Buzzer blocks allow for specific buzzer function such as beeping the horn.
 The units blocks allow for the user to choose between cm or inches, this relates to specific movement distances and the front distance sensor.
 
-For more information and educational resources, please visit the [product page here] (kitronik.co.uk/56130).
+For more information and educational resources, please visit the [product page here] ([https://kitronik.co.uk/56130](https://kitronik.co.uk/56130)).
 
 ## Use as Extension
 
@@ -17,7 +17,7 @@ This repository can be added as an **extension** in MakeCode.
 * open **[https://makecode.microbit.org/](https://makecode.microbit.org/)**
 * click on **New Project**
 * click on **Extensions** under the gearwheel menu
-* search for ** GITHUB LINK HERE ** and import
+* search for **(https://github.com/KitronikLtd/pxt-kitronik-mai-z)** and import
 
 # Movement Mai-Z Blocks
 
@@ -241,27 +241,10 @@ In this example, a variable will be set to Mai-Z front distance sensor reading:
 frontDistance = kitronikMaiZ.measureFrontDistance()
 ```
 
+## License
 
-> Open this page at [https://maxatkitronik.github.io/pxt-kitronik-mai-z/](https://maxatkitronik.github.io/pxt-kitronik-mai-z/)
+MIT
 
-## Use as Extension
-
-This repository can be added as an **extension** in MakeCode.
-
-* open [https://makecode.microbit.org/](https://makecode.microbit.org/)
-* click on **New Project**
-* click on **Extensions** under the gearwheel menu
-* search for **https://github.com/maxatkitronik/pxt-kitronik-mai-z** and import
-
-## Edit this project
-
-To edit this repository in MakeCode.
-
-* open [https://makecode.microbit.org/](https://makecode.microbit.org/)
-* click on **Import** then click on **Import URL**
-* paste **https://github.com/maxatkitronik/pxt-kitronik-mai-z** and click import
-
-#### Metadata (used for search, rendering)
+## Supported targets
 
 * for PXT/microbit
-<script src="https://makecode.com/gh-pages-embed.js"></script><script>makeCodeRender("{{ site.makecode.home_url }}", "{{ site.github.owner_name }}/{{ site.github.repository_name }}");</script>
