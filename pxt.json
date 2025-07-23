@@ -4,7 +4,7 @@
     "description": "micro:bit makecode extension for Kitronik's Mai-Z the mousebot",
     "license": "MIT",
     "dependencies": {
-        "core": "*",
+        "core": "*"
     },
     "files": [
         "README.md",
