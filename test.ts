@@ -5,6 +5,7 @@
 let RightLineFollowSensor = false
 let CliffDetectionStatus = false
 let FrontDistance = 0
+let SoftwareVersion = 0
 
 // Infinite Test Loop
 basic.forever(function () {
@@ -20,7 +21,7 @@ basic.forever(function () {
     kitronikMaiZ.maizMoveTiles(kitronikMaiZ.MoveXTiles.OneTile, 50)
     kitronikMaiZ.maizTurnTiles(kitronikMaiZ.TurnTiles.TurnRight)
     kitronikMaiZ.maizUTurn()
-
+    
     // LED Commands
     kitronikMaiZ.setLEDs(0x0000ff)
     kitronikMaiZ.setLED(kitronikMaiZ.LedID.ledOne, 0xff0000)
@@ -30,16 +31,19 @@ basic.forever(function () {
     basic.pause(2000)
     kitronikMaiZ.setIndicatorLights(kitronikMaiZ.IndicatorStatus.Off)
     kitronikMaiZ.setBrakeLights(kitronikMaiZ.BrakeStatus.Off)
-
+    
     // Sensor Commands
     RightLineFollowSensor = kitronikMaiZ.lineFollowStatus(kitronikMaiZ.LineFollowSensor.Right)
     CliffDetectionStatus = kitronikMaiZ.cliffDetectionStatus()
     kitronikMaiZ.autoCliffDetection(kitronikMaiZ.AutoCliffStatus.Disabled)
     FrontDistance = kitronikMaiZ.measureFrontDistance()
-
+    
     // Buzzer Commands
     kitronikMaiZ.soundBuzzer()
-
+    
     // Units Commands
-    kitronikMaiZ.unitsSelect(kitronikMaiZ.SelectUnits.Cm)
+    kitronikMaiZ.unitsSelect(kitronikMaiZ.SelectUnits.Centimeters)
+
+    //Software Version 
+    SoftwareVersion = kitronikMaiZ.returnSoftwareVersion()
 })
