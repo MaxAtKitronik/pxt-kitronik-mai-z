@@ -9,7 +9,7 @@ namespace kitronikMaiZ {
 	// Global Variables
 	// Movement
 	let distanceValue: number = 0; // Variable To Store Distance Value
-	const INCHES_CONSTANT: number = 2.54; // Inches To Centimeters Conversion Constant
+	const INCHES_CONSTANT: number = 2.54; // Inches To Centimetres Conversion Constant
 	const DISTANCE_CONSTANT: number = 100; // This Is To Avoid Decimals Not Being Sent As Parameters Are Sent At A Byte Level
 	// Sensors
 	let lineFollowValue: number = 0x00; // Line Following
@@ -282,11 +282,11 @@ namespace kitronikMaiZ {
 		//%block="nine"
 		NineTiles = 0x09,
 		//% block="ten"
-		TenTiles = 0x10,
+		TenTiles = 0x0A,
 		//% block="eleven"
-		ElevenTiles = 0x11,
+		ElevenTiles = 0x0B,
 		//%block="twelve"
-		TwelveTiles = 0x12
+		TwelveTiles = 0x0C
 	}
 	/**
 	 * Turn For Tiles
@@ -303,8 +303,8 @@ namespace kitronikMaiZ {
 	 * Select Units
 	 */
 	export enum SelectUnits {
-		//% block="centimeters"
-		Centimeters = 0x00,
+		//% block="centimetres"
+		Centimetres = 0x00,
 		//%block="inches"
 		Inches = 0x01
 	}
@@ -327,7 +327,7 @@ namespace kitronikMaiZ {
 	 * move [direction], [speed]% speed, for [distance]: moves Mai-Z in the relevant direction, at the relevant speed, over the relevant distance.
 	 * @param movedirection : forwards - moves Mai-Z motors forwards. backwards - moves Mai-Z motors backwards.
 	 * @param speed : speed in terms of a percentage e.g. 1 - 100.
-	 * @param distance : 0 / continuous - infinitely moves Mai-Z. distance to move in centimeters/inches dependant on unit set (centimeters by default).
+	 * @param distance : 0 / continuous - infinitely moves Mai-Z. distance to move in centimetres/inches dependant on unit set (centimetres by default).
 	 */
 	//% blockId=maiz_move
 	//% block="move $movedirection at $speed\\% speed for $distance units"
@@ -404,9 +404,9 @@ namespace kitronikMaiZ {
 	
 	/**
 	 * rotate [angle] degrees, [speed]% speed: Rotates Mai-Z over the relevant angle in the relevant direction (decided by the angle), at the relevant speed.
-	 * @param rotateratio : left - rotates mai-z left. right - rotates mai-z right.
+	 * @param rotateratio : left - rotates Mai-z left/anticlockwise. right - rotates Mai-z right/clockwise.
 	 * @param speed : speed in terms of a percentage e.g. 1 - 100.
-	 * @param angle : 0 / continuous - infinitely rotates mai-z. angle to move in degrees.
+	 * @param angle : 0 / continuous - infinitely rotates Mai-z. angle to move in degrees.
 	 */
 	//% blockId=maiz_rotate_angle
 	//% block="rotate $rotateratio degrees at $speed\\% speed"
@@ -415,7 +415,6 @@ namespace kitronikMaiZ {
 	//% color=#00A654
 	//% group="Rotate"
 	//% subcategory="Movement"
-	//% rotateratio.min=-180 rotateratio.max=180 
 	//% rotateratio.fieldOptions.precision=10
 	//% rotateratio.shadow=turnRatioPicker
 	//% speed.min=1 speed.max=100 speed.defl=50
@@ -425,10 +424,6 @@ namespace kitronikMaiZ {
 		let rotateDirection = rotateratio > 0 ? RotateDirection.Clockwise : RotateDirection.Anticlockwise;
 		// Extract Distance Value
 		distanceValue = (Math.abs(rotateratio) * DISTANCE_CONSTANT);
-		// Check If Inches Unit Is Set	
-		if (inchesFlag){
-			distanceValue = distanceValue * INCHES_CONSTANT;
-		}
 		// Convert Distance To Bytes
 		const distanceArray = intToByte(distanceValue);
 		// Send Rotate (Spin) Command And Parameters
@@ -543,7 +538,7 @@ namespace kitronikMaiZ {
 	
 	/**
 	 * move [number of tiles] at [speed]% speed: moves Mai-Z over the selected number of tiles at the relevant speed.
-	 * @param movextiles : amount of tiles to move across.
+	 * @param movextiles : amount of tiles to move across (each tile being 13.5 cm).
 	 * @param speed : speed in terms of a percentage e.g. 1 - 100.
 	 */
 	//% blockId=maiz_move_tiles
@@ -583,7 +578,7 @@ namespace kitronikMaiZ {
 	
 	/**
 	 * turn [direction]: turns Mai-Z ninety degrees left or right, for use with tiles set.
-	 * @param tileturndirection : left - rotates mai-z left/anticlockwise. right - rotates Mai-z right/clockwise.
+	 * @param tileturndirection : left - rotates Mai-z left/anticlockwise. right - rotates Mai-z right/clockwise.
 	 */
 	//% blockId=maiz_turn_tiles
 	//% block="turn $tileturndirection"
@@ -847,7 +842,7 @@ namespace kitronikMaiZ {
 	////////////////////
 	
 	/**
-	 * measure front distance: returns the front distance reading (2 - 200 centimeters).
+	 * measure front distance: returns the front distance reading (2 - 100 centimetres / 1 - 40 inches).
 	 */
 	//% blockId=maiz_front_distance
 	//% block="measure front distance"
@@ -874,8 +869,8 @@ namespace kitronikMaiZ {
 	//////////////////
 	
 	/**
-	 * measure in [units]: sets Mai-Z blocks to the relevant units (centimeters by default).
-	 * @param selectunits : select what units to measure in (centimeters, inches).
+	 * measure in [units]: sets Mai-Z blocks to the relevant units (centimetres by default).
+	 * @param selectunits : select what units to measure in (centimetres, inches).
 	 */
 	//% blockId=maiz_units_select
 	//% block="measure in $selectunits"
