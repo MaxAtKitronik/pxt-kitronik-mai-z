@@ -61,7 +61,7 @@ namespace kitronikMaiZ {
 	
 	// General Enums
 	// Command IDs
-	export enum CommandID {
+	enum CommandID {
 		// Movement / Motor Driver
 		MOVE = 0x01,
 		SPIN = 0x02,
@@ -93,13 +93,13 @@ namespace kitronikMaiZ {
 	}
 	
 	// Command Types
-	export enum CommandType {
+	enum CommandType {
 		TxCommand = 0x00, // Transmit - micro:bit To Mai-Z
 		RxCommand = 0x01 // Receive - Mai-Z To micro:bit
 	}
 	
 	// Error Codes
-	export enum ErrorCode {
+	enum ErrorCode {
 		// Mai-Z Side 
 		NO_ERROR = 0x00,
 		TIMEOUT_ERROR = 0x01,
@@ -178,13 +178,13 @@ namespace kitronikMaiZ {
 	 */
 	export enum LedID {
 		//% block="LED one"
-		ledOne = 0x00,
+		LedOne = 0x00,
 		//%block="LED two"
-		ledTwo = 0x01,
+		LedTwo = 0x01,
 		//% block="LED three"
-		ledThree = 0x02,
+		LedThree = 0x02,
 		//%block="LED four"
-		ledFour = 0x03,
+		LedFour = 0x03,
 	}
 	
 	/**
@@ -325,12 +325,12 @@ namespace kitronikMaiZ {
 	
 	/**
 	 * move [direction], [speed]% speed, for [distance]: moves Mai-Z in the relevant direction, at the relevant speed, over the relevant distance.
-	 * @param movedirection : forwards - moves Mai-Z motors forwards. backwards - moves Mai-Z motors backwards.
+	 * @param moveDirection : forwards - moves Mai-Z motors forwards. backwards - moves Mai-Z motors backwards.
 	 * @param speed : speed in terms of a percentage e.g. 1 - 100.
 	 * @param distance : 0 / continuous - infinitely moves Mai-Z. distance to move in centimetres/inches dependant on unit set (centimetres by default).
 	 */
 	//% blockId=maiz_move
-	//% block="move $movedirection at $speed\\% speed for $distance units"
+	//% block="move $moveDirection at $speed\\% speed for $distance units"
 	//% weight=100 
 	//% blockGap=8
 	//% color=#00A654
@@ -338,13 +338,13 @@ namespace kitronikMaiZ {
 	//% subcategory="Movement"
 	//% speed.min=1 speed.max=100 speed.defl=50
 	//% speed.fieldOptions.precision=1
-	export function maizMove(movedirection: MoveDirection, speed: number, distance: MoveDistance): void {
+	export function maizMove(moveDirection: MoveDirection, speed: number, distance: MoveDistance): void {
 		// Extract Distance Value
 		distanceValue = ((distance as number) * DISTANCE_CONSTANT);
 		// Check If Continuous Is Entered
 		if (distanceValue == MoveDistance.Continuous){
 			// Send Move Command And Parameters
-			commsRetries(CommandID.MOVE, [(movedirection as number), speed, distanceValue], CommandType.TxCommand);
+			commsRetries(CommandID.MOVE, [(moveDirection as number), speed, distanceValue], CommandType.TxCommand);
 		}
 		// If Distance Entered
 		else{
@@ -355,7 +355,7 @@ namespace kitronikMaiZ {
 			// Convert Distance To Bytes
 			const distanceArray = intToByte(distanceValue);
 			// Send MoveCommand And Parameters
-			commsRetries(CommandID.MOVE, [(movedirection as number), speed].concat(distanceArray), CommandType.TxCommand);
+			commsRetries(CommandID.MOVE, [(moveDirection as number), speed].concat(distanceArray), CommandType.TxCommand);
 			// Send Manoeuvre Complete Read Command 
 			commsRetries(CommandID.COMMAND_FINISHED_READ, [], CommandType.RxCommand);
 			// 10ms Delay - Prevent Overload
@@ -377,13 +377,13 @@ namespace kitronikMaiZ {
 	/////////////////////////////
 	
 	/**
-	 * rotate [direction] continuously, [speed]% speed: Rotates Mai-Z in the relevant direction, at the relevant speed, continuously.
-	 * @param rotatedirection : left - rotates mai-z left. right - rotates mai-z right.
+	 * rotate [direction] continuously, [speed]% speed: rotates Mai-Z in the relevant direction, at the relevant speed, continuously.
+	 * @param rotateDirection : clockwise - rotates Mai-z clockwise/left. anticlockwise - rotates Mai-z anticlockwise/right.
 	 * @param speed : speed in terms of a percentage e.g. 1 - 100.
-	 * @param angle : 0 / continuous - infinetly rotates mai-z. angle to move in degrees.
+	 * @param angle : 0 / continuous - infinitely rotates Mai-z. angle to move in degrees.
 	 */
 	//% blockId=maiz_rotate_continuous
-	//% block="rotate $rotatedirection continuously at $speed\\% speed"
+	//% block="rotate $rotateDirection continuously at $speed\\% speed"
 	//% weight=90 
 	//% blockGap=8
 	//% color=#00A654
@@ -391,9 +391,9 @@ namespace kitronikMaiZ {
 	//% subcategory="Movement"
 	//% speed.min=1 speed.max=100 speed.defl=50
 	//% speed.fieldOptions.precision=1
-	export function maizRotateContinuous(rotatedirection: RotateDirection, speed: number): void {
+	export function maizRotateContinuous(rotateDirection: RotateDirection, speed: number): void {
 		// Send Rotate (Spin) Command And Parameters
-		commsRetries(CommandID.SPIN, [(rotatedirection as number), speed, MoveDistance.Continuous], CommandType.TxCommand);
+		commsRetries(CommandID.SPIN, [(rotateDirection as number), speed, MoveDistance.Continuous], CommandType.TxCommand);
 		// Short Pause
 		basic.pause(100); // Allows For Movements / Motors To Be Completely Stopped Before Any Subsequent Commands Are Called
 	}
@@ -404,26 +404,26 @@ namespace kitronikMaiZ {
 	
 	/**
 	 * rotate [angle] degrees, [speed]% speed: Rotates Mai-Z over the relevant angle in the relevant direction (decided by the angle), at the relevant speed.
-	 * @param rotateratio : left - rotates Mai-z left/anticlockwise. right - rotates Mai-z right/clockwise.
+	 * @param rotateRatio : the angle in degrees for Mai-Z to rotate, postive values will rotate Mai-z anticlockwise/right, negative values will rotate Mai-z clockwise/left. 
 	 * @param speed : speed in terms of a percentage e.g. 1 - 100.
 	 * @param angle : 0 / continuous - infinitely rotates Mai-z. angle to move in degrees.
 	 */
 	//% blockId=maiz_rotate_angle
-	//% block="rotate $rotateratio degrees at $speed\\% speed"
+	//% block="rotate $rotateRatio degrees at $speed\\% speed"
 	//% weight=80 
 	//% blockGap=8
 	//% color=#00A654
 	//% group="Rotate"
 	//% subcategory="Movement"
-	//% rotateratio.fieldOptions.precision=10
-	//% rotateratio.shadow=turnRatioPicker
+	//% rotateRatio.fieldOptions.precision=10
+	//% rotateRatio.shadow=turnRatioPicker
 	//% speed.min=1 speed.max=100 speed.defl=50
 	//% speed.fieldOptions.precision=1
-	export function maizRotateAngle(rotateratio: number, speed: number): void {
-		// Extract Direction Based On If rotateratio Is + or -
-		let rotateDirection = rotateratio > 0 ? RotateDirection.Clockwise : RotateDirection.Anticlockwise;
+	export function maizRotateAngle(rotateRatio: number, speed: number): void {
+		// Extract Direction Based On If rotateRatio Is + or -
+		let rotateDirection = rotateRatio > 0 ? RotateDirection.Clockwise : RotateDirection.Anticlockwise;
 		// Extract Distance Value
-		distanceValue = (Math.abs(rotateratio) * DISTANCE_CONSTANT);
+		distanceValue = (Math.abs(rotateRatio) * DISTANCE_CONSTANT);
 		// Convert Distance To Bytes
 		const distanceArray = intToByte(distanceValue);
 		// Send Rotate (Spin) Command And Parameters
@@ -448,11 +448,12 @@ namespace kitronikMaiZ {
 	/////////////////////////
 	
 	/**
-	 * rotate 360 degrees in [direction] direction at [speed]% speed": turns Mai-Z a full 360 degree rotation in the relevant direction at the relevant speed.
-	 * @param rotatedirection : left - rotates Mai-Z left/anticlockwise. right - rotates Mai-Z right/clockwise.
+	 * rotate 360 degrees in [direction] direction at [speed]% speed: turns Mai-Z a full 360 degree rotation in the relevant direction at the relevant speed.
+	 * @param rotateDirection : clockwise - rotates Mai-z clockwise/left. anticlockwise - rotates Mai-z anticlockwise/right.
+	 * @param speed : speed in terms of a percentage e.g. 1 - 100.
 	 */
 	//% blockId=maiz_360_rotation
-	//% block="rotate 360 degrees in $rotatedirection direction at $speed\\% speed"
+	//% block="rotate 360 degrees in $rotateDirection direction at $speed\\% speed"
 	//% weight=70                    
 	//% blockGap=8
 	//% color=#00A654
@@ -460,9 +461,9 @@ namespace kitronikMaiZ {
 	//% subcategory="Movement"
 	//% speed.min=1 speed.max=100 speed.defl=50
 	//% speed.fieldOptions.precision=1
-	export function maiz360Rotation(rotatedirection: RotateDirection, speed: number): void {
+	export function maiz360Rotation(rotateDirection: RotateDirection, speed: number): void {
 		// Send Turn Command And Parameters
-		commsRetries(CommandID.SPIN, [(rotatedirection as number), speed, 0xA0, 0x8c], CommandType.TxCommand); // Pass The Chosen Direction With A Angle Of 360 (0xA0, 0x8C = 18000 In Hex) And A Speed Of 1%
+		commsRetries(CommandID.SPIN, [(rotateDirection as number), speed, 0xA0, 0x8c], CommandType.TxCommand); // Pass The Chosen Direction With A Angle Of 360 (0xA0, 0x8C = 18000 In Hex) And A Speed Of 1%
 		// Send Manoeuvre Complete Read Command 
 		commsRetries(CommandID.COMMAND_FINISHED_READ, [], CommandType.RxCommand);
 		// 10ms Delay - Prevent Overload
@@ -538,11 +539,11 @@ namespace kitronikMaiZ {
 	
 	/**
 	 * move [number of tiles] at [speed]% speed: moves Mai-Z over the selected number of tiles at the relevant speed.
-	 * @param movextiles : amount of tiles to move across (each tile being 13.5 cm).
+	 * @param moveXTiles : number of tiles to move across (each tile being 13.5 cm).
 	 * @param speed : speed in terms of a percentage e.g. 1 - 100.
 	 */
 	//% blockId=maiz_move_tiles
-	//% block="move $movextiles tiles at $speed\\% speed"
+	//% block="move $moveXTiles tiles at $speed\\% speed"
 	//% weight=100 
 	//% blockGap=8
 	//% color=#00A654
@@ -550,9 +551,9 @@ namespace kitronikMaiZ {
 	//% subcategory="Movement"
 	//% speed.min=1 speed.max=100 speed.defl=50
 	//% speed.fieldOptions.precision=1
-	export function maizMoveTiles(movextiles: MoveXTiles, speed: number): void {
+	export function maizMoveTiles(moveXTiles: MoveXTiles, speed: number): void {
 		// Extract Distance Value
-		distanceValue = ((movextiles as number) * 13.5 * DISTANCE_CONSTANT); // 13.5 - Distance Of One Tile
+		distanceValue = ((moveXTiles as number) * 13.5 * DISTANCE_CONSTANT); // 13.5 - Distance Of One Tile
 		// Convert Distance To Bytes
 		const distanceArray = intToByte(distanceValue);
 		// Send MoveCommand And Parameters
@@ -578,18 +579,18 @@ namespace kitronikMaiZ {
 	
 	/**
 	 * turn [direction]: turns Mai-Z ninety degrees left or right, for use with tiles set.
-	 * @param tileturndirection : left - rotates Mai-z left/anticlockwise. right - rotates Mai-z right/clockwise.
+	 * @param tileTurnDirection : left - rotates Mai-z left/anticlockwise. right - rotates Mai-z right/clockwise.
 	 */
 	//% blockId=maiz_turn_tiles
-	//% block="turn $tileturndirection"
+	//% block="turn $tileTurnDirection"
 	//% weight=90 
 	//% blockGap=8
 	//% color=#00A654
 	//% group="Tiles"
 	//% subcategory="Movement"
-	export function maizTurnTiles(tileturndirection: TurnTiles): void {
+	export function maizTurnTiles(tileTurnDirection: TurnTiles): void {
 		// Send Turn Command And Parameters
-		commsRetries(CommandID.SPIN, [(tileturndirection as number), 1, 0x28, 0x23], CommandType.TxCommand); // Pass The Chosen Direction With A Angle Of 90 (0x28, 0x23 = 900 In Hex) And A Speed Of 1%
+		commsRetries(CommandID.SPIN, [(tileTurnDirection as number), 1, 0x28, 0x23], CommandType.TxCommand); // Pass The Chosen Direction With A Angle Of 90 (0x28, 0x23 = 900 In Hex) And A Speed Of 1%
 		// Send Manoeuvre Complete Read Command 
 		commsRetries(CommandID.COMMAND_FINISHED_READ, [], CommandType.RxCommand);
 		// 10ms Delay - Prevent Overload
@@ -644,19 +645,19 @@ namespace kitronikMaiZ {
 	
 	/**
 	 * set LEDs to [colour]: sets the LEDs to the relevant colour.
-	 * @param ledcolours : colour of led (15 colours, off).
+	 * @param ledColours : colour of led (15 colours, off).
 	 */
 	//% blockId=maiz_set_leds
-	//% block="set LEDs to $ledcolours"
+	//% block="set LEDs to $ledColours"
 	//% weight=100 
 	//% blockGap=8
 	//% color=#996DAD
 	//% group="LEDs"
 	//% subcategory="Lighting & Sound"
-	//% ledcolours.shadow="colorNumberPicker"
-	export function setLEDs(ledcolours: number): void {
+	//% ledColours.shadow="colorNumberPicker"
+	export function setLEDs(ledColours: number): void {
 		// Send Set LEDs Command And Parameter
-		commsRetries(CommandID.TURN_ALL_ZIP_LEDS, [colourIDMapper(ledcolours)], CommandType.TxCommand);  // Pass The Colour Number Mapped As A Command ID
+		commsRetries(CommandID.TURN_ALL_ZIP_LEDS, [colourIDMapper(ledColours)], CommandType.TxCommand);  // Pass The Colour Number Mapped As A Command ID
 	}
 	
 	/////////////
@@ -665,20 +666,20 @@ namespace kitronikMaiZ {
 	
 	/**
 	 * set LED [LedID] to [colour]: sets the relevant LED to the relevant colour.
-	 * @param ledid : id of led (1-4).
-	 * @param ledcolours : colour of led (15 colours, off).
+	 * @param ledId : id of led (1-4).
+	 * @param ledColours : colour of led (15 colours, off).
 	 */
 	//% blockId=maiz_set_led
-	//% block="set $ledid to $ledcolours"
+	//% block="set $ledId to $ledColours"
 	//% weight=90 
 	//% blockGap=8
 	//% color=#996DAD
 	//% group="LEDs"
 	//% subcategory="Lighting & Sound"
-	//% ledcolours.shadow="colorNumberPicker"
-	export function setLED(ledid: LedID, ledcolours: number): void {
+	//% ledColours.shadow="colorNumberPicker"
+	export function setLED(ledId: LedID, ledColours: number): void {
 		// Send Set LED Command And Parameters
-		commsRetries(CommandID.SET_ZIP_LED, [(ledid as number), colourIDMapper(ledcolours)], CommandType.TxCommand); // Pass The Colour Number Mapped As A Command ID
+		commsRetries(CommandID.SET_ZIP_LED, [(ledId as number), colourIDMapper(ledColours)], CommandType.TxCommand); // Pass The Colour Number Mapped As A Command ID
 	}
 	
 	////////////////////
@@ -687,20 +688,20 @@ namespace kitronikMaiZ {
 	
 	/**
 	 * set LED brightness to [brightness]%: sets the LEDs to the relevant brightness.
-	 * @param ledbrightness : brightness of led as a percentage (1-100).
+	 * @param ledBrightness : brightness of led as a percentage (1-100).
 	 */
 	//% blockId=maiz_set_led_brightness
-	//% block="set LED brightness to $ledbrightness\\%"
+	//% block="set LED brightness to $ledBrightness\\%"
 	//% weight=80 
 	//% blockGap=8
 	//% color=#996DAD
 	//% group="LEDs"
 	//% subcategory="Lighting & Sound"
-	//% ledbrightness.min=1 ledbrightness.max=100
+	//% ledBrightness.min=1 ledBrightness.max=100
 	//% ledid.fieldOptions.precision=1
-	export function setLEDBrightness(ledbrightness: number): void {
-		// Map Brightness To 0 - 255 Scale
-		let mappedBrightness = ((ledbrightness * 128)/100);
+	export function setLEDBrightness(ledBrightness: number): void {
+		// Map Brightness To 0 - 128 Scale
+		let mappedBrightness = ((ledBrightness * 128)/100);
 		// Send LED Brightness Command And Mapped Parameter
 		commsRetries(CommandID.SET_ZIP_LED_BRIGHTNESS, [mappedBrightness], CommandType.TxCommand);
 	}
@@ -710,19 +711,19 @@ namespace kitronikMaiZ {
 	//////////////////////////
 	
 	/**
-	 * set indicator lights to [indicatorstatus]: sets indicator lights to the relevant indicator status.
-	 * @param indicatorstatus : status of indicator lights (left, right, hazards, off).
+	 * set indicator lights to [indicatorStatus]: sets indicator lights to the relevant indicator status.
+	 * @param indicatorStatus : status of indicator lights (left, right, hazards, off).
 	 */
 	//% blockId=maiz_set_indicator_lights
-	//% block="set indicator lights to $indicatorstatus"
+	//% block="set indicator lights to $indicatorStatus"
 	//% weight=70 
 	//% blockGap=8
 	//% color=#996DAD
 	//% group="Functional Lighting"
 	//% subcategory="Lighting & Sound"
-	export function setIndicatorLights(indicatorstatus: IndicatorStatus): void {
+	export function setIndicatorLights(indicatorStatus: IndicatorStatus): void {
 		// Send Indicator Command
-		commsRetries(CommandID.INDICATOR_LIGHT, [indicatorstatus as number], CommandType.TxCommand);
+		commsRetries(CommandID.INDICATOR_LIGHT, [indicatorStatus as number], CommandType.TxCommand);
 	}
 	
 	//////////////////////
@@ -730,19 +731,19 @@ namespace kitronikMaiZ {
 	//////////////////////
 	
 	/**
-	 * set brake lights to [breakstatus]: sets break lights to the relevant break status.
-	 * @param brakestatus : status of break lights (on, off).
+	 * set brake lights to [brakeStatus]: sets break lights to the relevant break status.
+	 * @param brakeStatus : status of break lights (on, off).
 	 */
 	//% blockId=maiz_set_break_lights
-	//% block="set brake lights to $brakestatus"
+	//% block="set brake lights to $brakeStatus"
 	//% weight=60 
 	//% blockGap=8
 	//% color=#996DAD
 	//% group="Functional Lighting"
 	//% subcategory="Lighting & Sound"
-	export function setBrakeLights(brakestatus: BrakeStatus): void {
+	export function setBrakeLights(brakeStatus: BrakeStatus): void {
 		// Send Break Light Command
-		commsRetries(CommandID.BREAK_LIGHT, [brakestatus as number], CommandType.TxCommand);
+		commsRetries(CommandID.BREAK_LIGHT, [brakeStatus as number], CommandType.TxCommand);
 	}
 	
 	// Buzzer
@@ -771,20 +772,20 @@ namespace kitronikMaiZ {
 	
 	/**
 	 * return [sensorID] line follow sensor status: returns relevant line follow sensor status as true or false.
-	 * @param linefollowsensor : select which line follow sensor status to return (left, centre, right).
+	 * @param lineFollowSensor : select which line follow sensor status to return (left, centre, right).
 	 */
 	//% blockId=maiz_line_follow_status
-	//% block="$linefollowsensor line follow sensor status"
+	//% block="$lineFollowSensor line follow sensor status"
 	//% weight=100 
 	//% blockGap=8
 	//% color=#00ADE5
 	//% group="Line Follow"
 	//% subcategory="Sensors"
-	export function lineFollowStatus(linefollowsensor: LineFollowSensor): boolean {
+	export function lineFollowStatus(lineFollowSensor: LineFollowSensor): boolean {
 		// Send Line Follow Command (Returns Status Of 3 Line Detect And Cliff Detection)
 		commsRetries(CommandID.LINE_FOLLOWING_DETECT, [], CommandType.RxCommand);
 		// Extract Which Sensor User Has Selected
-		let sensorSelect = linefollowsensor as number;
+		let sensorSelect = lineFollowSensor as number;
 		// Extract Cliff Detection Bit Using Bit Mask
 		let lineFollowStatus = (lineFollowValue & sensorSelect);
 		// Return Boolean Cast Of Bit
@@ -819,21 +820,22 @@ namespace kitronikMaiZ {
 	////////////////////////////
 	
 	/**
-	 * auto cliff detection [autocliffstatus]: when enabled this automatically stops the motors and further command processing once a cliff is detected.
+	 * auto cliff detection [autoCliffStatus]: when enabled this automatically stops the motors and further command processing once a cliff is detected.
+	 * @param autoCliffStatus : determines if auto cliff detection is enabled or disabled.
 	 */
 	
 	//% blockId=maiz_auto_cliff_detection
-	//% block="auto cliff detection $autocliffstatus"
+	//% block="auto cliff detection $autoCliffStatus"
 	//% weight=80 
 	//% blockGap=8
 	//% color=#00ADE5
 	//% group="Line Follow"
 	//% subcategory="Sensors"
-	export function autoCliffDetection(autocliffstatus: AutoCliffStatus): void {
+	export function autoCliffDetection(autoCliffStatus: AutoCliffStatus): void {
 		// Send Auto Cliff Detection Status
-		commsRetries(CommandID.AUTO_CLIFF_DETECT, [autocliffstatus as number], CommandType.TxCommand);
+		commsRetries(CommandID.AUTO_CLIFF_DETECT, [autoCliffStatus as number], CommandType.TxCommand);
 		// Set Flag Based On The Auto Cliff Status
-		if (autocliffstatus === AutoCliffStatus.Enabled) autoCliffEnabled = true;
+		if (autoCliffStatus === AutoCliffStatus.Enabled) autoCliffEnabled = true;
 		else autoCliffEnabled = false;
 	}
 	
@@ -870,18 +872,18 @@ namespace kitronikMaiZ {
 	
 	/**
 	 * measure in [units]: sets Mai-Z blocks to the relevant units (centimetres by default).
-	 * @param selectunits : select what units to measure in (centimetres, inches).
+	 * @param selectUnits : select what units to measure in (centimetres, inches).
 	 */
 	//% blockId=maiz_units_select
-	//% block="measure in $selectunits"
+	//% block="measure in $selectUnits"
 	//% weight=100 
 	//% blockGap=8
 	//% color=#EE3D96
 	//% group="Units"
 	//% subcategory="Other"
-	export function unitsSelect(selectunits: SelectUnits): void {
+	export function unitsSelect(selectUnits: SelectUnits): void {
 		// Set Flag To Boolean Cast Of Input
-		inchesFlag = !!selectunits;
+		inchesFlag = !!selectUnits;
 	}
 	
 	// Miscellaneous
@@ -918,7 +920,7 @@ namespace kitronikMaiZ {
 	// Outputs: Array Of Bytes 
 	// ---------------------------------------------------------
 	
-	export function intToByte(parameterValue: number): number[]{
+	function intToByte(parameterValue: number): number[]{
 		// Define Array To Store Bytes in
 		let parameterArray = [];
 		// Loop Until Parameter Value Completely Processed
@@ -943,7 +945,7 @@ namespace kitronikMaiZ {
 	// Outputs: Check Byte
 	// ------------------------------------------------------------------
 	
-	export function calculateCheckByte(message: number[]): number{
+	function calculateCheckByte(message: number[]): number{
 		// Calculate Check Byte
 		let checkByte = 0;
 		// Total Message Array Bytes
@@ -967,7 +969,7 @@ namespace kitronikMaiZ {
 	// Outputs: Void / Send Prepared Message To Mai-Z Over I2C 
 	// ---------------------------------------------------------
 	
-	export function txMessage(commandID: number, commandParameters: number[]){
+	function txMessage(commandID: number, commandParameters: number[]){
 		// Calculate Message Length
 		const txMessageLength = (commandParameters.length + 2); // Number Of Parameters + 1 For Command ID + 1 For Check Byte
 		// Initialise Message Array With Data
@@ -995,7 +997,7 @@ namespace kitronikMaiZ {
 	// Outputs: Void / Save Relevant Data To Global Variables 
 	// ---------------------------------------------------------
 	
-	export function rxMessage(readID: number){
+	function rxMessage(readID: number){
 		// Send Read Command Message
 		txMessage(readID, []);
 		// Declare Rx Data Buffer
@@ -1088,7 +1090,7 @@ namespace kitronikMaiZ {
 	// ------------------------------------------------------------------
 	// Outputs: Void / Error Codes
 	// ------------------------------------------------------------------
-	export function commsRetries(commandID: number, commandParameters: number[], commsType: CommandType){
+	function commsRetries(commandID: number, commandParameters: number[], commsType: CommandType){
 		// Define Variables
 		let retriesCounter: number = 0; // Retries Counter
 		// Retries Loop
