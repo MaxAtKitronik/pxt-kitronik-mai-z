@@ -42,7 +42,7 @@ basic.forever(function () {
     kitronikMaiZ.soundBuzzer()
     
     // Units Commands
-    kitronikMaiZ.unitsSelect(kitronikMaiZ.SelectUnits.Centimeters)
+    kitronikMaiZ.unitsSelect(kitronikMaiZ.SelectUnits.Centimetres)
 
     //Software Version 
     SoftwareVersion = kitronikMaiZ.returnSoftwareVersion()
