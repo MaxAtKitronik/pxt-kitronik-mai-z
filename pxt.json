@@ -1,6 +1,6 @@
 {
     "name": "pxt-kitronik-mai-z",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "description": "micro:bit makecode extension for Kitronik's Mai-Z the mousebot",
     "license": "MIT",
     "dependencies": {
@@ -8,8 +8,7 @@
     },
     "files": [
         "README.md",
-        "Mai-Z.ts",
-        "test.ts"
+        "Mai-Z.ts"
     ],
     "testFiles": [
         "test.ts"
