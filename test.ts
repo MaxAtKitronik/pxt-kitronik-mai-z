@@ -24,7 +24,7 @@ basic.forever(function () {
     
     // LED Commands
     kitronikMaiZ.setLEDs(0x0000ff)
-    kitronikMaiZ.setLED(kitronikMaiZ.LedID.ledOne, 0xff0000)
+    kitronikMaiZ.setLED(kitronikMaiZ.LedID.LedOne, 0xff0000)
     kitronikMaiZ.setLEDBrightness(50)
     kitronikMaiZ.setIndicatorLights(kitronikMaiZ.IndicatorStatus.Left)
     kitronikMaiZ.setBrakeLights(kitronikMaiZ.BrakeStatus.On)
