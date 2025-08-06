@@ -145,7 +145,7 @@ namespace kitronikMaiZ {
 		//%block="10"
 		TenUnits = 0x0A,
 		//%block="15"
-		FifteenUnits = 0x0E,
+		FifteenUnits = 0x0F,
 		//%block="20"
 		TwentyUnits = 0x14,
 		//%block="25"
