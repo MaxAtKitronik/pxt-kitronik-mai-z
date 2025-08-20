@@ -145,7 +145,7 @@ namespace kitronikMaiZ {
 		//%block="10"
 		TenUnits = 0x0A,
 		//%block="15"
-		FifteenUnits = 0x0F,
+		FifteenUnits = 0x0E,
 		//%block="20"
 		TwentyUnits = 0x14,
 		//%block="25"
@@ -339,12 +339,14 @@ namespace kitronikMaiZ {
 	//% speed.min=1 speed.max=100 speed.defl=50
 	//% speed.fieldOptions.precision=1
 	export function maizMove(moveDirection: MoveDirection, speed: number, distance: MoveDistance): void {
+		// Cap Speed To Expected Range (1-100)
+		const cappedSpeed = Math.max(1, Math.min(100, Math.round(speed)));
 		// Extract Distance Value
 		distanceValue = ((distance as number) * DISTANCE_CONSTANT);
 		// Check If Continuous Is Entered
 		if (distanceValue == MoveDistance.Continuous){
 			// Send Move Command And Parameters
-			commsRetries(CommandID.MOVE, [(moveDirection as number), speed, distanceValue], CommandType.TxCommand);
+			commsRetries(CommandID.MOVE, [(moveDirection as number), cappedSpeed, distanceValue], CommandType.TxCommand);
 		}
 		// If Distance Entered
 		else{
@@ -355,7 +357,7 @@ namespace kitronikMaiZ {
 			// Convert Distance To Bytes
 			const distanceArray = intToByte(distanceValue);
 			// Send MoveCommand And Parameters
-			commsRetries(CommandID.MOVE, [(moveDirection as number), speed].concat(distanceArray), CommandType.TxCommand);
+			commsRetries(CommandID.MOVE, [(moveDirection as number), cappedSpeed].concat(distanceArray), CommandType.TxCommand);
 			// Send Manoeuvre Complete Read Command 
 			commsRetries(CommandID.COMMAND_FINISHED_READ, [], CommandType.RxCommand);
 			// 10ms Delay - Prevent Overload
@@ -392,8 +394,10 @@ namespace kitronikMaiZ {
 	//% speed.min=1 speed.max=100 speed.defl=50
 	//% speed.fieldOptions.precision=1
 	export function maizRotateContinuous(rotateDirection: RotateDirection, speed: number): void {
+		// Cap Speed To Expected Range (1-100)
+		const cappedSpeed = Math.max(1, Math.min(100, Math.round(speed)));
 		// Send Rotate (Spin) Command And Parameters
-		commsRetries(CommandID.SPIN, [(rotateDirection as number), speed, MoveDistance.Continuous], CommandType.TxCommand);
+		commsRetries(CommandID.SPIN, [(rotateDirection as number), cappedSpeed, MoveDistance.Continuous], CommandType.TxCommand);
 		// Short Pause
 		basic.pause(100); // Allows For Movements / Motors To Be Completely Stopped Before Any Subsequent Commands Are Called
 	}
@@ -420,6 +424,8 @@ namespace kitronikMaiZ {
 	//% speed.min=1 speed.max=100 speed.defl=50
 	//% speed.fieldOptions.precision=1
 	export function maizRotateAngle(rotateRatio: number, speed: number): void {
+		// Cap Speed To Expected Range (1-100)
+		const cappedSpeed = Math.max(1, Math.min(100, Math.round(speed)));
 		// Extract Direction Based On If rotateRatio Is + or -
 		let rotateDirection = rotateRatio > 0 ? RotateDirection.Clockwise : RotateDirection.Anticlockwise;
 		// Extract Distance Value
@@ -427,7 +433,7 @@ namespace kitronikMaiZ {
 		// Convert Distance To Bytes
 		const distanceArray = intToByte(distanceValue);
 		// Send Rotate (Spin) Command And Parameters
-		commsRetries(CommandID.SPIN, [(rotateDirection as number), speed].concat(distanceArray), CommandType.TxCommand); // Pass The Angle As A Positive Number/Unsigned Integer
+		commsRetries(CommandID.SPIN, [(rotateDirection as number), cappedSpeed].concat(distanceArray), CommandType.TxCommand); // Pass The Angle As A Positive Number/Unsigned Integer
 		// Send Manoeuvre Complete Read Command 
 		commsRetries(CommandID.COMMAND_FINISHED_READ, [], CommandType.RxCommand);
 		// 10ms Delay - Prevent Overload
@@ -462,8 +468,10 @@ namespace kitronikMaiZ {
 	//% speed.min=1 speed.max=100 speed.defl=50
 	//% speed.fieldOptions.precision=1
 	export function maiz360Rotation(rotateDirection: RotateDirection, speed: number): void {
+		// Cap Speed To Expected Range (1-100)
+		const cappedSpeed = Math.max(1, Math.min(100, Math.round(speed)));
 		// Send Turn Command And Parameters
-		commsRetries(CommandID.SPIN, [(rotateDirection as number), speed, 0xA0, 0x8c], CommandType.TxCommand); // Pass The Chosen Direction With A Angle Of 360 (0xA0, 0x8C = 18000 In Hex) And A Speed Of 1%
+		commsRetries(CommandID.SPIN, [(rotateDirection as number), cappedSpeed, 0xA0, 0x8c], CommandType.TxCommand); // Pass The Chosen Direction With A Angle Of 360 (0xA0, 0x8C = 18000 In Hex) And A Speed Of 1%
 		// Send Manoeuvre Complete Read Command 
 		commsRetries(CommandID.COMMAND_FINISHED_READ, [], CommandType.RxCommand);
 		// 10ms Delay - Prevent Overload
@@ -552,12 +560,14 @@ namespace kitronikMaiZ {
 	//% speed.min=1 speed.max=100 speed.defl=50
 	//% speed.fieldOptions.precision=1
 	export function maizMoveTiles(moveXTiles: MoveXTiles, speed: number): void {
+		// Cap Speed To Expected Range (1-100)
+		const cappedSpeed = Math.max(1, Math.min(100, Math.round(speed)));
 		// Extract Distance Value
 		distanceValue = ((moveXTiles as number) * 13.5 * DISTANCE_CONSTANT); // 13.5 - Distance Of One Tile
 		// Convert Distance To Bytes
 		const distanceArray = intToByte(distanceValue);
 		// Send MoveCommand And Parameters
-		commsRetries(CommandID.MOVE, [(MoveDirection.Forwards), speed].concat(distanceArray), CommandType.TxCommand);
+		commsRetries(CommandID.MOVE, [(MoveDirection.Forwards), cappedSpeed].concat(distanceArray), CommandType.TxCommand);
 		// Send Manoeuvre Complete Read Command 
 		commsRetries(CommandID.COMMAND_FINISHED_READ, [], CommandType.RxCommand);
 		// 10ms Delay - Prevent Overload
@@ -590,7 +600,7 @@ namespace kitronikMaiZ {
 	//% subcategory="Movement"
 	export function maizTurnTiles(tileTurnDirection: TurnTiles): void {
 		// Send Turn Command And Parameters
-		commsRetries(CommandID.SPIN, [(tileTurnDirection as number), 1, 0x28, 0x23], CommandType.TxCommand); // Pass The Chosen Direction With A Angle Of 90 (0x28, 0x23 = 900 In Hex) And A Speed Of 1%
+		commsRetries(CommandID.SPIN, [(tileTurnDirection as number), 50, 0x28, 0x23], CommandType.TxCommand); // Pass The Chosen Direction With A Angle Of 90 (0x28, 0x23 = 900 In Hex) And A Speed Of 50%
 		// Send Manoeuvre Complete Read Command 
 		commsRetries(CommandID.COMMAND_FINISHED_READ, [], CommandType.RxCommand);
 		// 10ms Delay - Prevent Overload
@@ -622,7 +632,7 @@ namespace kitronikMaiZ {
 	//% subcategory="Movement"
 	export function maizUTurn(): void {
 		// Send Turn Command And Parameters
-		commsRetries(CommandID.SPIN, [(RotateDirection.Clockwise), 1, 0x50, 0x46], CommandType.TxCommand); // Pass The Chosen Direction With A Angle Of 180 (0x50, 0x46 = 1800 In Hex) And A Speed Of 1%
+		commsRetries(CommandID.SPIN, [(RotateDirection.Clockwise), 50, 0x50, 0x46], CommandType.TxCommand); // Pass The Chosen Direction With A Angle Of 180 (0x50, 0x46 = 1800 In Hex) And A Speed Of 50%
 		// Send Manoeuvre Complete Read Command 
 		commsRetries(CommandID.COMMAND_FINISHED_READ, [], CommandType.RxCommand);
 		// 10ms Delay - Prevent Overload
@@ -697,7 +707,7 @@ namespace kitronikMaiZ {
 	//% color=#996DAD
 	//% group="LEDs"
 	//% subcategory="Lighting & Sound"
-	//% ledBrightness.min=1 ledBrightness.max=100
+	//% ledBrightness.min=1 ledBrightness.max=100 ledBrightness.defl=50
 	//% ledid.fieldOptions.precision=1
 	export function setLEDBrightness(ledBrightness: number): void {
 		// Map Brightness To 0 - 128 Scale
