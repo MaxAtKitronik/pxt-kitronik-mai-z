@@ -145,7 +145,7 @@ namespace kitronikMaiZ {
 		//%block="10"
 		TenUnits = 0x0A,
 		//%block="15"
-		FifteenUnits = 0x0E,
+		FifteenUnits = 0x0F,
 		//%block="20"
 		TwentyUnits = 0x14,
 		//%block="25"
@@ -382,7 +382,6 @@ namespace kitronikMaiZ {
 	 * rotate [direction] continuously, [speed]% speed: rotates Mai-Z in the relevant direction, at the relevant speed, continuously.
 	 * @param rotateDirection : clockwise - rotates Mai-z clockwise/left. anticlockwise - rotates Mai-z anticlockwise/right.
 	 * @param speed : speed in terms of a percentage e.g. 1 - 100.
-	 * @param angle : 0 / continuous - infinitely rotates Mai-z. angle to move in degrees.
 	 */
 	//% blockId=maiz_rotate_continuous
 	//% block="rotate $rotateDirection continuously at $speed\\% speed"
